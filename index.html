@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Football Canva Mobile v5</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: #171a21;
+      --panel-2: #0f131b;
+      --line: #252a36;
+      --line-2: #31384a;
+      --text: #ffffff;
+      --muted: #a8b0c4;
+      --accent: #ffd84d;
+      --success: #1f9d64;
+      --danger: #b83a3a;
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin:0; padding:0; background:var(--bg); color:var(--text); font-family: Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { min-height:100vh; }
+    .wrap { max-width: 1500px; margin: 0 auto; padding: 16px; padding-bottom: 92px; }
+    .hero { text-align:center; margin-bottom:16px; }
+    .hero h1 { margin:0 0 8px; font-size: clamp(24px, 4vw, 36px); }
+    .hero p { margin:0; color:var(--muted); line-height:1.8; font-size:15px; }
+    .layout { display:grid; grid-template-columns: minmax(330px, 460px) 1fr; gap:16px; align-items:start; }
+    .card { background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:15px; box-shadow:0 14px 26px rgba(0,0,0,.22); margin-bottom:14px; }
+    .card h2, .card h3 { margin:0 0 12px; font-size:18px; }
+    .row { margin-bottom:12px; }
+    .label { display:block; margin-bottom:8px; font-size:14px; font-weight:bold; color:#e1e7f4; }
+    .muted, .status-line { color:var(--muted); font-size:13px; line-height:1.7; }
+    input[type="file"], input[type="text"], input[type="number"], select, textarea {
+      width:100%; padding:12px; border-radius:13px; border:1px solid var(--line-2); background:var(--panel-2); color:var(--text); outline:none; font-size:15px;
+    }
+    textarea { min-height: 88px; resize: vertical; line-height: 1.7; }
+    input[type="range"] { width:100%; margin:0; accent-color:var(--accent); min-height:34px; }
+    input[type="checkbox"] { width:18px; height:18px; accent-color:var(--accent); }
+    button { width:100%; border:0; border-radius:13px; padding:13px 14px; font-size:15px; font-weight:bold; cursor:pointer; touch-action: manipulation; transition: transform .15s ease, opacity .15s ease; }
+    button:active { transform:scale(.98); } button:disabled { opacity:.55; cursor:not-allowed; }
+    .primary { background:var(--accent); color:#111; } .secondary { background:#283041; color:#fff; } .success { background:var(--success); color:#fff; } .danger { background:var(--danger); color:#fff; }
+    .two, .three, .four, .btns { display:grid; gap:10px; }
+    .two { grid-template-columns:1fr 1fr; } .three { grid-template-columns:repeat(3,1fr); } .four { grid-template-columns:repeat(4,1fr); } .btns { grid-template-columns:1fr 1fr; }
+    .chip-row { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+    .chip { border:1px solid var(--line-2); background:var(--panel-2); border-radius:13px; padding:12px 10px; text-align:center; font-size:14px; font-weight:bold; cursor:pointer; user-select:none; }
+    .chip.active { background:var(--accent); color:#111; border-color:var(--accent); }
+    .palette-group { margin-top:12px; padding:12px; border:1px solid var(--line); border-radius:14px; background:rgba(255,255,255,.02); }
+    .palette-title { margin:0 0 10px; font-size:13px; color:var(--muted); font-weight:bold; }
+    .swatches { display:grid; grid-template-columns:repeat(6, 1fr); gap:10px; }
+    .swatch { height:38px; border-radius:12px; border:2px solid rgba(255,255,255,.12); cursor:pointer; position:relative; box-shadow:inset 0 0 0 1px rgba(0,0,0,.18); }
+    .swatch.active::after { content:"✓"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-weight:bold; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.55); font-size:16px; }
+    .preset-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+    .preset-btn { width:100%; background:var(--panel-2); color:var(--text); border:1px solid var(--line-2); border-radius:14px; padding:12px; text-align:right; line-height:1.5; }
+    .preset-btn small { display:block; color:var(--muted); font-size:12px; margin-top:4px; font-weight:normal; }
+    .inline-check { display:flex; align-items:center; gap:8px; background:var(--panel-2); border:1px solid var(--line-2); padding:11px 12px; border-radius:13px; min-height:47px; }
+    .preview-panel { display:flex; flex-direction:column; gap:14px; min-width:0; }
+    .preview-meta { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; }
+    .canvas-shell { position:relative; background:#090c12; border:1px solid var(--line); border-radius:18px; overflow:auto; min-height:520px; display:flex; align-items:center; justify-content:center; padding:14px; }
+    canvas { display:block; max-width:100%; height:auto; background:#000; border-radius:16px; box-shadow:0 16px 40px rgba(0,0,0,.35); touch-action:none; user-select:none; }
+    .overlay-pill { position:absolute; right:14px; bottom:14px; background:rgba(15,19,27,.88); border:1px solid rgba(255,255,255,.08); border-radius:999px; padding:9px 12px; font-size:12px; color:#d9dfef; pointer-events:none; backdrop-filter:blur(8px); }
+    .small-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .nudge-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; max-width:250px; margin:0 auto; }
+    .nudge-grid .empty { visibility:hidden; }
+    .sticky-actions { position:fixed; right:10px; left:10px; bottom:10px; z-index:30; display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; background:rgba(15,17,21,.92); border:1px solid rgba(255,255,255,.08); border-radius:18px; padding:10px; backdrop-filter:blur(10px); box-shadow:0 18px 30px rgba(0,0,0,.28); }
+    .sticky-actions button { padding:12px 10px; font-size:14px; }
+    .layer-list { display:flex; flex-direction:column; gap:8px; }
+    .layer-item { background:var(--panel-2); border:1px solid var(--line-2); border-radius:14px; padding:10px; display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center; }
+    .layer-item.active { border-color:var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+    .layer-item-title { font-weight:bold; font-size:14px; }
+    .layer-item-sub { color:var(--muted); font-size:12px; margin-top:3px; }
+    .layer-actions { display:flex; gap:6px; flex-wrap:wrap; }
+    .mini-btn { width:auto; min-width:42px; padding:8px 10px; border-radius:10px; background:#273044; color:#fff; font-size:12px; }
+    .mini-btn.warn { background:#7a6320; } .mini-btn.bad { background:#7b2d2d; }
+    .section-note { padding:10px 12px; background:rgba(255,255,255,.03); border:1px solid var(--line); border-radius:12px; color:var(--muted); font-size:13px; line-height:1.7; }
+    @media (max-width:1080px) { .layout { grid-template-columns:1fr; } .preview-panel { order:-1; } .canvas-shell { min-height:330px; } }
+    @media (max-width:720px) { .wrap { padding:12px; } .card { padding:14px; border-radius:16px; } .two, .three, .four, .btns, .chip-row, .small-grid, .preset-grid { grid-template-columns:1fr; } button, input, select, textarea { font-size:16px; } .preview-meta { align-items:flex-start; flex-direction:column; } .layer-item { grid-template-columns:1fr; } }
+  </style>
+
+  <meta name="theme-color" content="#0f1115" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Football Canva" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icons/icon.svg" />
+
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <h1>⚽ Football Canva Mobile v5</h1>
+      <p>نسخة أقوى للتيم: Multi Text Layers + Layer Order + Templates + Logo Library + Autosave، مع Drag / Pinch Zoom / Rotate للموبايل.</p>
+    </div>
+
+    <div class="layout">
+      <div>
+        <div class="card">
+          <h2>1) مقاس التصميم</h2>
+          <div class="chip-row" id="sizeChips">
+            <div class="chip active" data-size="portrait">1080×1350</div>
+            <div class="chip" data-size="square">1080×1080</div>
+            <div class="chip" data-size="landscape">1920×1080</div>
+            <div class="chip" data-size="reset">Reset</div>
+          </div>
+          <div class="status-line" style="margin-top:10px;" id="sizeStatus">المقاس الحالي: 1080 × 1350</div>
+        </div>
+
+        <div class="card">
+          <h2>2) الملفات والمكتبات</h2>
+          <div class="row">
+            <label class="label">الصورة الأساسية</label>
+            <input type="file" id="bgInput" accept="image/*" />
+          </div>
+          <div class="row two">
+            <div>
+              <label class="label">رفع لوجو جديد</label>
+              <input type="file" id="logoInput" accept="image/*" />
+            </div>
+            <div>
+              <label class="label">اسم اللوجو</label>
+              <input type="text" id="logoName" placeholder="مثال: Premier League" />
+            </div>
+          </div>
+          <div class="row btns">
+            <button class="success" id="saveLogoBtn" type="button">حفظ اللوجو بالمكتبة</button>
+            <button class="secondary" id="addLogoLayerBtn" type="button">إضافة لوجو Layer</button>
+          </div>
+          <div class="row two">
+            <div>
+              <label class="label">مكتبة اللوجوهات</label>
+              <select id="savedLogosSelect"></select>
+            </div>
+            <div class="btns" style="margin-top:26px;">
+              <button class="secondary" id="applySavedLogoBtn" type="button">استخدم اللوجو</button>
+              <button class="danger" id="deleteSavedLogoBtn" type="button">حذف اللوجو</button>
+            </div>
+          </div>
+          <hr style="border-color:var(--line); opacity:.35; margin:14px 0;" />
+          <div class="row two">
+            <div>
+              <label class="label">رفع فريم جديد</label>
+              <input type="file" id="frameInput" accept="image/*" />
+            </div>
+            <div>
+              <label class="label">اسم الفريم</label>
+              <input type="text" id="frameName" placeholder="مثال: Match Result Frame" />
+            </div>
+          </div>
+          <div class="row btns">
+            <button class="success" id="saveFrameBtn" type="button">حفظ الفريم</button>
+            <button class="secondary" id="useFrameTempBtn" type="button">استخدامه الآن</button>
+          </div>
+          <div class="row two">
+            <div>
+              <label class="label">الفريمات المحفوظة للمقاس الحالي</label>
+              <select id="savedFramesSelect"></select>
+            </div>
+            <div class="btns" style="margin-top:26px;">
+              <button class="secondary" id="applySavedFrameBtn" type="button">تفعيل الفريم</button>
+              <button class="danger" id="deleteSavedFrameBtn" type="button">حذف الفريم</button>
+            </div>
+          </div>
+          <div class="muted">كل اللوجوهات والفريمات بتتحفظ داخل نفس المتصفح على نفس الجهاز ✅</div>
+        </div>
+
+        <div class="card">
+          <h2>3) القوالب الجاهزة</h2>
+          <div class="preset-grid" id="templateButtons">
+            <button class="preset-btn" type="button" data-template="breaking">Breaking News<small>عنوان كبير + لوجو + فريم خبر</small></button>
+            <button class="preset-btn" type="button" data-template="result">Match Result<small>نتيجة كبيرة + سطر سفلي</small></button>
+            <button class="preset-btn" type="button" data-template="lineup">Lineup<small>عنوان + 3 سطور جاهزة</small></button>
+            <button class="preset-btn" type="button" data-template="transfer">Transfer<small>عنوان انتقال + سطر توضيحي</small></button>
+          </div>
+          <div class="section-note" style="margin-top:12px;">القالب بيضيف Text Layers جاهزة سريعة. الفريم أو اللوجو لو موجودين في المكتبة تقدر تطبقهم بعد القالب مباشرة ✨</div>
+        </div>
+
+        <div class="card">
+          <h2>4) الطبقات Layers</h2>
+          <div class="row btns">
+            <button class="primary" id="addTextLayerBtn" type="button">+ إضافة Text Layer</button>
+            <button class="secondary" id="duplicateLayerBtn" type="button">تكرار Layer</button>
+          </div>
+          <div class="row btns">
+            <button class="secondary" id="moveUpBtn" type="button">⬆️ للأمام</button>
+            <button class="secondary" id="moveDownBtn" type="button">⬇️ للخلف</button>
+          </div>
+          <div class="layer-list" id="layerList"></div>
+          <div class="muted" style="margin-top:10px;">آخر Layer في القائمة هي اللي فوق في التصميم. الفريم دائمًا فوق الجميع.</div>
+        </div>
+
+        <div class="card">
+          <h2>5) خصائص الـ Layer النشطة</h2>
+          <div class="row status-line" id="activeLayerText">Layer نشطة: الصورة</div>
+          <div class="row" id="textEditorWrap">
+            <label class="label">النص</label>
+            <textarea id="textValue" placeholder="اكتب النص هنا"></textarea>
+          </div>
+          <div class="row four" id="textControlsWrap">
+            <div>
+              <label class="label">حجم الخط</label>
+              <input type="number" id="fontSize" value="86" min="12" max="240" />
+            </div>
+            <div>
+              <label class="label">الخط</label>
+              <select id="fontFamily">
+                <option value="Arial, sans-serif">Arial</option>
+                <option value="Tahoma, sans-serif">Tahoma</option>
+                <option value="Verdana, sans-serif">Verdana</option>
+                <option value="Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif">Impact</option>
+                <option value="Georgia, serif">Georgia</option>
+                <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
+                <option value="'Arial Black', Gadget, sans-serif">Arial Black</option>
+                <option value="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">System UI</option>
+              </select>
+            </div>
+            <div>
+              <label class="label">لون الخط</label>
+              <input type="text" id="textColor" value="#ffffff" />
+            </div>
+            <div>
+              <label class="label">لون الـ Stroke</label>
+              <input type="text" id="strokeColor" value="#000000" />
+            </div>
+          </div>
+          <div class="row two" id="textControlsWrap2">
+            <div>
+              <label class="label">سمك الـ Stroke</label>
+              <input type="range" id="strokeWidth" min="0" max="20" step="1" value="6" />
+            </div>
+            <div>
+              <label class="label">المحاذاة</label>
+              <select id="textAlign">
+                <option value="center">وسط</option>
+                <option value="right">يمين</option>
+                <option value="left">شمال</option>
+              </select>
+            </div>
+          </div>
+          <div class="palette-group" id="textPaletteWrap">
+            <div class="palette-title">ألوان سريعة للنص</div>
+            <div class="swatches" id="textPalette"></div>
+            <div class="palette-title" style="margin-top:10px;">ألوان سريعة للـ Stroke</div>
+            <div class="swatches" id="strokePalette"></div>
+          </div>
+          <div class="palette-group" id="textPresetWrap">
+            <div class="palette-title">ستايلات نص سريعة</div>
+            <div class="preset-grid" id="textPresets">
+              <button class="preset-btn" type="button" data-preset="breaking">Breaking News<small>أبيض + Stroke قوي</small></button>
+              <button class="preset-btn" type="button" data-preset="result">Match Result<small>أصفر واضح للأرقام</small></button>
+              <button class="preset-btn" type="button" data-preset="lineup">Lineup<small>ستايل تشكيل أنيق</small></button>
+              <button class="preset-btn" type="button" data-preset="transfer">Transfer<small>سماوي + حد داكن</small></button>
+            </div>
+          </div>
+          <div class="row two" style="margin-top:12px;">
+            <div class="inline-check"><input type="checkbox" id="layerVisible" checked /> <label for="layerVisible">إظهار Layer</label></div>
+            <div class="inline-check"><input type="checkbox" id="layerLocked" /> <label for="layerLocked">Lock Layer</label></div>
+          </div>
+          <div class="row four">
+            <div>
+              <label class="label">X</label>
+              <input type="number" id="layerX" />
+            </div>
+            <div>
+              <label class="label">Y</label>
+              <input type="number" id="layerY" />
+            </div>
+            <div>
+              <label class="label">Scale</label>
+              <input type="number" id="layerScale" step="0.01" min="0.05" max="10" />
+            </div>
+            <div>
+              <label class="label">Rotate</label>
+              <input type="number" id="layerRotate" step="1" min="-360" max="360" />
+            </div>
+          </div>
+          <div class="row" id="bgFitWrap">
+            <label class="label">طريقة عرض الصورة</label>
+            <select id="bgFit">
+              <option value="cover">Cover</option>
+              <option value="contain">Contain</option>
+            </select>
+          </div>
+          <div class="row btns">
+            <button class="secondary" id="resetLayerBtn" type="button">Reset Layer</button>
+            <button class="secondary" id="centerLayerBtn" type="button">Center Layer</button>
+          </div>
+          <div class="nudge-grid">
+            <div class="empty"></div>
+            <button class="mini-btn" id="nudgeUp" type="button">⬆️</button>
+            <div class="empty"></div>
+            <button class="mini-btn" id="nudgeLeft" type="button">⬅️</button>
+            <button class="mini-btn warn" id="deleteLayerBtn" type="button">🗑</button>
+            <button class="mini-btn" id="nudgeRight" type="button">➡️</button>
+            <div class="empty"></div>
+            <button class="mini-btn" id="nudgeDown" type="button">⬇️</button>
+            <div class="empty"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="preview-panel">
+        <div class="card">
+          <div class="preview-meta">
+            <div>
+              <h2 style="margin:0 0 6px;">المعاينة المباشرة</h2>
+              <div class="muted" id="statusText">جاهز للشغل ✨</div>
+              <div class="muted" id="projectText">Autosave: شغال</div>
+            </div>
+            <div class="inline-check"><input type="checkbox" id="showGuides" checked /> <label for="showGuides">Show Guides</label></div>
+          </div>
+          <div class="canvas-shell">
+            <canvas id="canvas" width="1080" height="1350"></canvas>
+            <div class="overlay-pill" id="gesturePill">Drag • Pinch Zoom • Rotate</div>
+          </div>
+          <div class="row btns" style="margin-top:12px;">
+            <button class="primary" id="renderBtn" type="button">تحديث</button>
+            <button class="secondary" id="previewCleanBtn" type="button">Preview Clean Export</button>
+          </div>
+          <div class="row btns">
+            <button class="success" id="downloadPngBtn" type="button">تحميل PNG</button>
+            <button class="success" id="downloadJpgBtn" type="button">تحميل JPG</button>
+          </div>
+          <div class="row btns">
+            <button class="secondary" id="toggleGuidesBtn" type="button">Show / Hide Guides</button>
+            <button class="secondary" id="saveProjectBtn" type="button">حفظ يدوي الآن</button>
+          </div>
+          <div class="row two">
+            <div class="inline-check"><input type="checkbox" id="highQuality" checked /> <label for="highQuality">جودة أعلى</label></div>
+            <button class="danger" id="resetProjectBtn" type="button">Reset Project</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sticky-actions">
+    <button class="secondary" id="stickyRenderBtn" type="button">تحديث</button>
+    <button class="success" id="stickyPngBtn" type="button">PNG</button>
+    <button class="primary" id="stickySaveBtn" type="button">Save</button>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const sizeChips = Array.from(document.querySelectorAll('#sizeChips .chip'));
+    const sizeStatus = document.getElementById('sizeStatus');
+    const statusText = document.getElementById('statusText');
+    const projectText = document.getElementById('projectText');
+    const gesturePill = document.getElementById('gesturePill');
+    const showGuidesInput = document.getElementById('showGuides');
+    const highQualityInput = document.getElementById('highQuality');
+    const activeLayerText = document.getElementById('activeLayerText');
+    const layerList = document.getElementById('layerList');
+
+    const bgInput = document.getElementById('bgInput');
+    const logoInput = document.getElementById('logoInput');
+    const logoNameInput = document.getElementById('logoName');
+    const savedLogosSelect = document.getElementById('savedLogosSelect');
+    const frameInput = document.getElementById('frameInput');
+    const frameNameInput = document.getElementById('frameName');
+    const savedFramesSelect = document.getElementById('savedFramesSelect');
+
+    const textValueInput = document.getElementById('textValue');
+    const fontSizeInput = document.getElementById('fontSize');
+    const fontFamilyInput = document.getElementById('fontFamily');
+    const textColorInput = document.getElementById('textColor');
+    const strokeColorInput = document.getElementById('strokeColor');
+    const strokeWidthInput = document.getElementById('strokeWidth');
+    const textAlignInput = document.getElementById('textAlign');
+    const layerVisibleInput = document.getElementById('layerVisible');
+    const layerLockedInput = document.getElementById('layerLocked');
+    const layerXInput = document.getElementById('layerX');
+    const layerYInput = document.getElementById('layerY');
+    const layerScaleInput = document.getElementById('layerScale');
+    const layerRotateInput = document.getElementById('layerRotate');
+    const bgFitInput = document.getElementById('bgFit');
+
+    const textEditorWrap = document.getElementById('textEditorWrap');
+    const textControlsWrap = document.getElementById('textControlsWrap');
+    const textControlsWrap2 = document.getElementById('textControlsWrap2');
+    const textPaletteWrap = document.getElementById('textPaletteWrap');
+    const textPresetWrap = document.getElementById('textPresetWrap');
+    const bgFitWrap = document.getElementById('bgFitWrap');
+
+    const sizes = {
+      portrait: { width: 1080, height: 1350, label: '1080 × 1350' },
+      square: { width: 1080, height: 1080, label: '1080 × 1080' },
+      landscape: { width: 1920, height: 1080, label: '1920 × 1080' }
+    };
+
+    const storage = {
+      frames: 'football.v5.frames',
+      logos: 'football.v5.logos',
+      project: 'football.v5.project',
+      lastFrame: 'football.v5.lastFrame'
+    };
+
+    const palettes = ['#ffffff','#000000','#ffd84d','#ff3b30','#00c2ff','#00d084','#f97316','#a855f7','#ef4444','#1d4ed8','#94a3b8','#111827'];
+    const textPresets = {
+      breaking: { fontFamily: "Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif", fontSize: 96, color: '#ffffff', strokeColor: '#000000', strokeWidth: 7, align: 'center' },
+      result: { fontFamily: "'Arial Black', Gadget, sans-serif", fontSize: 110, color: '#ffd84d', strokeColor: '#111111', strokeWidth: 8, align: 'center' },
+      lineup: { fontFamily: 'Tahoma, sans-serif', fontSize: 78, color: '#ffffff', strokeColor: '#1f2937', strokeWidth: 5, align: 'center' },
+      transfer: { fontFamily: "'Trebuchet MS', sans-serif", fontSize: 88, color: '#00c2ff', strokeColor: '#111827', strokeWidth: 6, align: 'center' }
+    };
+
+    const app = {
+      sizeKey: 'portrait',
+      activeLayerId: 'background',
+      background: { id:'background', type:'image', name:'الصورة الأساسية', visible:true, locked:false, x:540, y:675, scale:1, rotation:0, fit:'cover', image:null },
+      textLayers: [],
+      logoLayers: [],
+      frame: { id:'frame', type:'frame', name:'الفريم', visible:true, locked:false, image:null, frameId:'' },
+      tempFrameImage: null,
+      tempLogoImage: null,
+      savedFrames: { portrait:[], square:[], landscape:[] },
+      savedLogos: [],
+      layerBoxes: {},
+      previewTimer: null,
+      autosaveTimer: null,
+      projectSavedAt: null,
+      nextId: 1
+    };
+
+    const pointers = new Map();
+    const gesture = { dragging:false, startX:0, startY:0, startLayerX:0, startLayerY:0, pinchStartDistance:0, pinchStartAngle:0, pinchStartScale:1, pinchStartRotation:0, hintTimer:null };
+
+    function newId(prefix) { return `${prefix}-${Date.now()}-${app.nextId++}`; }
+    function cloneData(obj) { return JSON.parse(JSON.stringify(obj)); }
+    function getCanvasSize() { return sizes[app.sizeKey]; }
+    function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+    function radians(deg) { return deg * Math.PI / 180; }
+    function degrees(rad) { return rad * 180 / Math.PI; }
+    function normalizeColor(value, fallback) { const raw = String(value || '').trim(); return /^#[0-9a-fA-F]{6}$/.test(raw) ? raw.toLowerCase() : fallback; }
+
+    function createTextLayer(text = 'عنوان جديد') {
+      const size = getCanvasSize();
+      return { id:newId('text'), type:'text', name:`Text ${app.textLayers.length + 1}`, visible:true, locked:false, x:size.width/2, y:Math.round(size.height * 0.18) + (app.textLayers.length * 90), scale:1, rotation:0, text, fontSize:86, fontFamily:'Arial, sans-serif', color:'#ffffff', strokeColor:'#000000', strokeWidth:6, align:'center' };
+    }
+
+    function createLogoLayer(img = null, name = 'لوجو') {
+      const size = getCanvasSize();
+      return { id:newId('logo'), type:'logo', name, visible:true, locked:false, x:size.width - 150, y:150 + (app.logoLayers.length * 100), scale:1, rotation:0, baseMax:170, image:img };
+    }
+
+    function getContentLayers() { return [app.background, ...app.textLayers, ...app.logoLayers]; }
+    function getAllLayers() { return [...getContentLayers(), app.frame]; }
+    function findLayerById(id) { return getAllLayers().find(layer => layer.id === id); }
+    function getActiveLayer() { return findLayerById(app.activeLayerId) || app.background; }
+    function isTransformable(layer) { return layer && layer.type !== 'frame'; }
+
+    function updateCanvasSize() {
+      const size = getCanvasSize();
+      canvas.width = size.width; canvas.height = size.height; sizeStatus.textContent = `المقاس الحالي: ${size.label}`;
+    }
+
+    function centerDefaultsForSize() {
+      const size = getCanvasSize();
+      app.background.x = size.width / 2; app.background.y = size.height / 2; app.background.scale = 1; app.background.rotation = 0;
+      app.textLayers.forEach((layer, index) => { layer.x = size.width / 2; layer.y = Math.round(size.height * 0.18) + (index * 90); });
+      app.logoLayers.forEach((layer, index) => { layer.x = size.width - 150; layer.y = 150 + (index * 100); });
+    }
+
+    function updateLayerListUI() {
+      const layers = getAllLayers();
+      layerList.innerHTML = '';
+      layers.forEach(layer => {
+        const item = document.createElement('div');
+        item.className = `layer-item ${layer.id === app.activeLayerId ? 'active' : ''}`;
+        const title = document.createElement('div');
+        const visibleLabel = layer.visible ? 'ظاهر' : 'مخفي';
+        const lockedLabel = layer.locked ? ' • مقفول' : '';
+        title.innerHTML = `<div class="layer-item-title">${layer.name}</div><div class="layer-item-sub">${layer.type} • ${visibleLabel}${lockedLabel}</div>`;
+        title.style.cursor = 'pointer';
+        title.onclick = () => setActiveLayer(layer.id);
+        const actions = document.createElement('div');
+        actions.className = 'layer-actions';
+        actions.innerHTML = `
+          <button class="mini-btn" type="button">Select</button>
+          <button class="mini-btn" type="button">${layer.visible ? 'Hide' : 'Show'}</button>
+          <button class="mini-btn warn" type="button">${layer.locked ? 'Unlock' : 'Lock'}</button>
+          ${layer.type === 'background' || layer.type === 'frame' ? '' : '<button class="mini-btn bad" type="button">Delete</button>'}
+        `;
+        const buttons = actions.querySelectorAll('button');
+        buttons[0].onclick = () => setActiveLayer(layer.id);
+        buttons[1].onclick = () => { layer.visible = !layer.visible; if (!layer.visible && app.activeLayerId === layer.id) setActiveLayer(layer.id); renderAndMaybeSave('تم تحديث الظهور ✨'); };
+        buttons[2].onclick = () => { layer.locked = !layer.locked; renderAndMaybeSave('تم تحديث القفل ✨'); };
+        if (buttons[3]) buttons[3].onclick = () => deleteLayer(layer.id);
+        item.appendChild(title); item.appendChild(actions); layerList.appendChild(item);
+      });
+    }
+
+    function populatePalette(containerId, colors, target) {
+      const wrap = document.getElementById(containerId); wrap.innerHTML = '';
+      colors.forEach(color => {
+        const sw = document.createElement('button'); sw.type = 'button'; sw.className = 'swatch'; sw.dataset.color = color; sw.style.background = color;
+        sw.onclick = () => {
+          if (target === 'text') textColorInput.value = color;
+          if (target === 'stroke') strokeColorInput.value = color;
+          syncTextEditorToLayer(); renderAndMaybeSave('تم تحديث اللون 🎨');
+        };
+        wrap.appendChild(sw);
+      });
+    }
+
+    function updatePaletteSelection() {
+      document.querySelectorAll('#textPalette .swatch').forEach(el => el.classList.toggle('active', (el.dataset.color || '') === normalizeColor(textColorInput.value, '#ffffff')));
+      document.querySelectorAll('#strokePalette .swatch').forEach(el => el.classList.toggle('active', (el.dataset.color || '') === normalizeColor(strokeColorInput.value, '#000000')));
+    }
+
+    function updateEditorsVisibility() {
+      const layer = getActiveLayer();
+      const isText = layer.type === 'text';
+      const isBg = layer.type === 'image';
+      [textEditorWrap, textControlsWrap, textControlsWrap2, textPaletteWrap, textPresetWrap].forEach(el => el.style.display = isText ? 'block' : 'none');
+      bgFitWrap.style.display = isBg ? 'block' : 'none';
+    }
+
+    function syncEditorsFromLayer() {
+      const layer = getActiveLayer();
+      activeLayerText.textContent = `Layer نشطة: ${layer.name}`;
+      layerVisibleInput.checked = !!layer.visible;
+      layerLockedInput.checked = !!layer.locked;
+      if (isTransformable(layer)) {
+        layerXInput.disabled = false; layerYInput.disabled = false; layerScaleInput.disabled = false; layerRotateInput.disabled = false;
+        layerXInput.value = Math.round(layer.x || 0); layerYInput.value = Math.round(layer.y || 0); layerScaleInput.value = Number(layer.scale || 1).toFixed(2); layerRotateInput.value = Math.round(layer.rotation || 0);
+      } else {
+        layerXInput.disabled = true; layerYInput.disabled = true; layerScaleInput.disabled = true; layerRotateInput.disabled = true; layerXInput.value = 0; layerYInput.value = 0; layerScaleInput.value = 1; layerRotateInput.value = 0;
+      }
+      if (layer.type === 'text') {
+        textValueInput.value = layer.text || '';
+        fontSizeInput.value = layer.fontSize || 86;
+        fontFamilyInput.value = layer.fontFamily || 'Arial, sans-serif';
+        textColorInput.value = layer.color || '#ffffff';
+        strokeColorInput.value = layer.strokeColor || '#000000';
+        strokeWidthInput.value = layer.strokeWidth || 6;
+        textAlignInput.value = layer.align || 'center';
+      }
+      bgFitInput.value = app.background.fit || 'cover';
+      updateEditorsVisibility();
+      updatePaletteSelection();
+      updateLayerListUI();
+    }
+
+    function setActiveLayer(id) { app.activeLayerId = id; syncEditorsFromLayer(); render(); }
+
+    function setSize(sizeKey, reset = false) {
+      if (!sizes[sizeKey]) return;
+      app.sizeKey = sizeKey;
+      sizeChips.forEach(chip => chip.classList.toggle('active', chip.dataset.size === sizeKey));
+      if (reset) centerDefaultsForSize();
+      updateCanvasSize();
+      populateSavedFramesSelect();
+      applyLastSavedFrameForCurrentSize();
+      syncEditorsFromLayer();
+      renderAndMaybeSave('تم تحديث المقاس ✅');
+    }
+
+    function readFileAsImage(file) {
+      return new Promise((resolve, reject) => {
+        if (!file) return resolve(null);
+        const reader = new FileReader();
+        reader.onload = e => { const img = new Image(); img.onload = () => resolve(img); img.onerror = reject; img.src = e.target.result; };
+        reader.onerror = reject; reader.readAsDataURL(file);
+      });
+    }
+    function imageToDataURL(img, type = 'image/png') { if (!img) return ''; const c = document.createElement('canvas'); c.width = img.naturalWidth || img.width; c.height = img.naturalHeight || img.height; c.getContext('2d').drawImage(img,0,0); return c.toDataURL(type); }
+    function dataURLToImage(dataUrl) { return new Promise((resolve, reject) => { if (!dataUrl) return resolve(null); const img = new Image(); img.onload = () => resolve(img); img.onerror = reject; img.src = dataUrl; }); }
+
+    function wrapText(text, maxWidth) {
+      const words = String(text || '').split(/\s+/).filter(Boolean);
+      const lines = []; let current = '';
+      for (const word of words) {
+        const test = current ? `${current} ${word}` : word;
+        if (ctx.measureText(test).width > maxWidth && current) { lines.push(current); current = word; } else { current = test; }
+      }
+      if (current) lines.push(current);
+      return lines.length ? lines : [''];
+    }
+
+    function updateLayerBox(layerId, box) { app.layerBoxes[layerId] = box; }
+    function drawSelectionBox(box) {
+      if (!box) return;
+      ctx.save(); ctx.translate(box.x, box.y); ctx.rotate(radians(box.rotation || 0)); ctx.setLineDash([18, 10]); ctx.lineWidth = 4; ctx.strokeStyle = '#ffd84d'; ctx.strokeRect(-box.width/2, -box.height/2, box.width, box.height); ctx.fillStyle = '#ffd84d';
+      const handleSize = 12; [[-box.width/2, -box.height/2], [box.width/2, -box.height/2], [-box.width/2, box.height/2], [box.width/2, box.height/2]].forEach(([x,y]) => ctx.fillRect(x-handleSize/2, y-handleSize/2, handleSize, handleSize));
+      ctx.restore();
+    }
+
+    function drawImageLayer(layer) {
+      if (!layer.visible || !layer.image) { updateLayerBox(layer.id, null); return; }
+      const img = layer.image; const size = getCanvasSize();
+      let drawW, drawH;
+      if (layer.type === 'image') {
+        const baseScale = (layer.fit || 'cover') === 'contain' ? Math.min(size.width / img.width, size.height / img.height) : Math.max(size.width / img.width, size.height / img.height);
+        drawW = img.width * baseScale * layer.scale; drawH = img.height * baseScale * layer.scale;
+      } else {
+        const baseScale = (layer.baseMax || 170) / Math.max(img.width, img.height); drawW = img.width * baseScale * layer.scale; drawH = img.height * baseScale * layer.scale;
+      }
+      ctx.save(); ctx.translate(layer.x, layer.y); ctx.rotate(radians(layer.rotation)); ctx.drawImage(img, -drawW/2, -drawH/2, drawW, drawH); ctx.restore();
+      updateLayerBox(layer.id, { x: layer.x, y: layer.y, width: drawW, height: drawH, rotation: layer.rotation });
+    }
+
+    function drawTextLayer(layer) {
+      if (!layer.visible || !String(layer.text || '').trim()) { updateLayerBox(layer.id, null); return; }
+      const size = getCanvasSize(); const fontSize = Math.max(12, layer.fontSize * layer.scale);
+      ctx.save(); ctx.translate(layer.x, layer.y); ctx.rotate(radians(layer.rotation)); ctx.textBaseline = 'middle'; ctx.font = `bold ${fontSize}px ${layer.fontFamily}`; ctx.fillStyle = layer.color; ctx.strokeStyle = layer.strokeColor; ctx.lineWidth = layer.strokeWidth;
+      const maxWidth = size.width * 0.84; const lines = wrapText(layer.text, maxWidth); const lineHeight = fontSize * 1.12;
+      let textAlign = 'center'; let anchorX = 0;
+      if (layer.align === 'left') { textAlign = 'left'; anchorX = -maxWidth / 2; }
+      if (layer.align === 'right') { textAlign = 'right'; anchorX = maxWidth / 2; }
+      ctx.textAlign = textAlign;
+      lines.forEach((line, index) => { const y = (index - ((lines.length - 1) / 2)) * lineHeight; if (layer.strokeWidth > 0) ctx.strokeText(line, anchorX, y); ctx.fillText(line, anchorX, y); });
+      const maxMeasured = Math.max(...lines.map(line => ctx.measureText(line).width), 1); const boxWidth = Math.min(maxWidth, maxMeasured); const boxHeight = Math.max(lineHeight, lines.length * lineHeight);
+      ctx.restore(); updateLayerBox(layer.id, { x:layer.x, y:layer.y, width:boxWidth, height:boxHeight, rotation:layer.rotation });
+    }
+
+    function drawFrame() { if (app.frame.visible && app.frame.image) ctx.drawImage(app.frame.image, 0, 0, canvas.width, canvas.height); }
+    function drawSafeGuides() { if (!showGuidesInput.checked) return; ctx.save(); ctx.strokeStyle = 'rgba(255,216,77,.55)'; ctx.lineWidth = 3; ctx.setLineDash([14,10]); const padX = Math.round(canvas.width * 0.06); const padY = Math.round(canvas.height * 0.06); ctx.strokeRect(padX, padY, canvas.width - (padX * 2), canvas.height - (padY * 2)); ctx.restore(); }
+
+    function render(options = {}) {
+      const settings = { includeEditorOverlay: true, includeGuides: showGuidesInput.checked, ...options };
+      ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = '#000'; ctx.fillRect(0, 0, canvas.width, canvas.height); app.layerBoxes = {};
+      drawImageLayer(app.background);
+      getContentLayers().filter(l => l.id !== 'background').forEach(layer => {
+        if (layer.type === 'text') drawTextLayer(layer); else drawImageLayer(layer);
+      });
+      drawFrame();
+      if (settings.includeGuides) drawSafeGuides();
+      const active = getActiveLayer();
+      if (settings.includeEditorOverlay && active.visible && isTransformable(active) && !active.locked) drawSelectionBox(app.layerBoxes[active.id]);
+    }
+
+    function previewCleanExport() {
+      render({ includeEditorOverlay: false, includeGuides: false });
+      statusText.textContent = 'معاينة التصدير النظيف شغالة ✅';
+      clearTimeout(app.previewTimer); app.previewTimer = setTimeout(() => { render(); statusText.textContent = 'رجعنا لوضع التحرير العادي ✨'; }, 1400);
+    }
+
+    function syncTextEditorToLayer() {
+      const layer = getActiveLayer();
+      if (layer.type !== 'text') return;
+      layer.text = textValueInput.value;
+      layer.fontSize = parseInt(fontSizeInput.value || '86', 10);
+      layer.fontFamily = fontFamilyInput.value || 'Arial, sans-serif';
+      layer.color = normalizeColor(textColorInput.value, '#ffffff'); textColorInput.value = layer.color;
+      layer.strokeColor = normalizeColor(strokeColorInput.value, '#000000'); strokeColorInput.value = layer.strokeColor;
+      layer.strokeWidth = parseInt(strokeWidthInput.value || '6', 10);
+      layer.align = textAlignInput.value || 'center';
+      updatePaletteSelection();
+    }
+
+    function applyLayerInputs() {
+      const layer = getActiveLayer();
+      layer.visible = layerVisibleInput.checked; layer.locked = layerLockedInput.checked;
+      if (isTransformable(layer)) {
+        layer.x = parseFloat(layerXInput.value || '0'); layer.y = parseFloat(layerYInput.value || '0'); layer.scale = clamp(parseFloat(layerScaleInput.value || '1'), 0.05, 10); layer.rotation = parseFloat(layerRotateInput.value || '0');
+      }
+      if (layer.type === 'image') app.background.fit = bgFitInput.value || 'cover';
+      renderAndMaybeSave('تم تحديث الـ Layer ✅');
+    }
+
+    function applyTextPreset(name) {
+      const layer = getActiveLayer(); if (layer.type !== 'text') return;
+      const preset = textPresets[name]; if (!preset) return;
+      Object.assign(layer, preset); syncEditorsFromLayer(); renderAndMaybeSave('تم تطبيق ستايل النص ✨');
+    }
+
+    function addTextLayer(text = 'عنوان جديد') {
+      const layer = createTextLayer(text); app.textLayers.push(layer); setActiveLayer(layer.id); renderAndMaybeSave('تمت إضافة Text Layer ✅');
+    }
+
+    function addLogoLayer(img, name = 'لوجو') {
+      if (!img) { alert('ارفع لوجو أو اختر واحد من المكتبة.'); return; }
+      const layer = createLogoLayer(img, name); app.logoLayers.push(layer); setActiveLayer(layer.id); renderAndMaybeSave('تمت إضافة لوجو Layer ✅');
+    }
+
+    function duplicateLayer() {
+      const layer = getActiveLayer();
+      if (layer.type === 'background' || layer.type === 'frame') return;
+      const copy = cloneData(layer); copy.id = newId(layer.type); copy.name = `${layer.name} Copy`; copy.x += 40; copy.y += 40;
+      if (layer.type === 'logo') copy.image = layer.image;
+      if (layer.type === 'text') app.textLayers.push(copy); else app.logoLayers.push(copy);
+      setActiveLayer(copy.id); renderAndMaybeSave('تم تكرار الـ Layer ✨');
+    }
+
+    function deleteLayer(id = app.activeLayerId) {
+      const layer = findLayerById(id); if (!layer || layer.type === 'background' || layer.type === 'frame') return;
+      app.textLayers = app.textLayers.filter(item => item.id !== id);
+      app.logoLayers = app.logoLayers.filter(item => item.id !== id);
+      setActiveLayer(app.background.id); renderAndMaybeSave('تم حذف الـ Layer 🗑');
+    }
+
+    function moveActiveLayer(direction) {
+      const layer = getActiveLayer(); if (!layer || layer.type === 'background' || layer.type === 'frame') return;
+      const content = getContentLayers(); const ids = content.map(l => l.id); const currentIndex = ids.indexOf(layer.id); if (currentIndex < 0) return;
+      const targetIndex = direction === 'up' ? Math.min(content.length - 1, currentIndex + 1) : Math.max(1, currentIndex - 1);
+      if (currentIndex === targetIndex) return;
+      const movable = content.slice(1); const movingIndex = movable.findIndex(l => l.id === layer.id); const newIndex = direction === 'up' ? Math.min(movable.length - 1, movingIndex + 1) : Math.max(0, movingIndex - 1);
+      if (movingIndex === -1 || movingIndex === newIndex) return;
+      const item = movable.splice(movingIndex, 1)[0]; movable.splice(newIndex, 0, item);
+      app.textLayers = movable.filter(l => l.type === 'text');
+      app.logoLayers = movable.filter(l => l.type === 'logo');
+      syncEditorsFromLayer(); renderAndMaybeSave(direction === 'up' ? 'تم تقديم الـ Layer ⬆️' : 'تم إرسال الـ Layer للخلف ⬇️');
+    }
+
+    function resetLayer() {
+      const layer = getActiveLayer(); if (!isTransformable(layer)) return;
+      const size = getCanvasSize(); layer.scale = 1; layer.rotation = 0;
+      if (layer.type === 'image') { layer.x = size.width / 2; layer.y = size.height / 2; }
+      if (layer.type === 'text') { layer.x = size.width / 2; layer.y = Math.round(size.height * 0.18); }
+      if (layer.type === 'logo') { layer.x = size.width - 150; layer.y = 150; }
+      syncEditorsFromLayer(); renderAndMaybeSave('تم Reset للـ Layer ✨');
+    }
+
+    function centerLayer() { const layer = getActiveLayer(); if (!isTransformable(layer)) return; const size = getCanvasSize(); layer.x = size.width/2; layer.y = size.height/2; syncEditorsFromLayer(); renderAndMaybeSave('تم توسيط الـ Layer ✨'); }
+    function nudge(dx, dy) { const layer = getActiveLayer(); if (!isTransformable(layer) || layer.locked) return; layer.x += dx; layer.y += dy; syncEditorsFromLayer(); renderAndMaybeSave(); }
+
+    function getPointerPoint(event) { const rect = canvas.getBoundingClientRect(); return { x: event.clientX - rect.left, y: event.clientY - rect.top }; }
+    function rotatePointToLocal(point, box) { const dx = point.x - box.x; const dy = point.y - box.y; const angle = -radians(box.rotation || 0); return { x:(dx * Math.cos(angle)) - (dy * Math.sin(angle)), y:(dx * Math.sin(angle)) + (dy * Math.cos(angle)) }; }
+    function pointInsideBox(point, box) { if (!box) return false; const local = rotatePointToLocal(point, box); return Math.abs(local.x) <= box.width/2 && Math.abs(local.y) <= box.height/2; }
+    function hitTest(point) {
+      const order = [...getContentLayers()].reverse();
+      for (const layer of order) { if (!layer.visible || layer.locked) continue; if (pointInsideBox(point, app.layerBoxes[layer.id])) return layer.id; }
+      return null;
+    }
+    function getDistance(a,b) { const dx = a.x - b.x, dy = a.y - b.y; return Math.sqrt(dx*dx + dy*dy); }
+    function getAngle(a,b) { return Math.atan2(b.y - a.y, b.x - a.x); }
+    function showGesture(text) { gesturePill.textContent = text; clearTimeout(gesture.hintTimer); gesture.hintTimer = setTimeout(() => gesturePill.textContent = 'Drag • Pinch Zoom • Rotate', 1300); }
+
+    function pointerDown(event) {
+      const point = getPointerPoint(event); canvas.setPointerCapture(event.pointerId); pointers.set(event.pointerId, point);
+      if (pointers.size === 1) {
+        const hitLayerId = hitTest(point); if (hitLayerId) setActiveLayer(hitLayerId);
+        const layer = getActiveLayer(); if (!isTransformable(layer) || layer.locked || !layer.visible) return;
+        gesture.dragging = true; gesture.startX = point.x; gesture.startY = point.y; gesture.startLayerX = layer.x; gesture.startLayerY = layer.y; showGesture('اسحب الـ Layer بالإصبع ✨');
+      }
+      if (pointers.size === 2) {
+        const layer = getActiveLayer(); if (!isTransformable(layer) || layer.locked || !layer.visible) return;
+        const points = Array.from(pointers.values()); gesture.dragging = false; gesture.pinchStartDistance = getDistance(points[0], points[1]) || 1; gesture.pinchStartAngle = getAngle(points[0], points[1]); gesture.pinchStartScale = layer.scale; gesture.pinchStartRotation = layer.rotation; showGesture('Zoom + Rotate شغالين ✅');
+      }
+    }
+    function pointerMove(event) {
+      if (!pointers.has(event.pointerId)) return; pointers.set(event.pointerId, getPointerPoint(event)); const layer = getActiveLayer(); if (!isTransformable(layer) || layer.locked || !layer.visible) return;
+      if (pointers.size === 1 && gesture.dragging) { const point = Array.from(pointers.values())[0]; layer.x = gesture.startLayerX + (point.x - gesture.startX); layer.y = gesture.startLayerY + (point.y - gesture.startY); syncEditorsFromLayer(); render(); }
+      if (pointers.size === 2) { const points = Array.from(pointers.values()); const dist = getDistance(points[0], points[1]) || 1; const angle = getAngle(points[0], points[1]); layer.scale = clamp(gesture.pinchStartScale * (dist / gesture.pinchStartDistance), 0.05, 10); layer.rotation = gesture.pinchStartRotation + degrees(angle - gesture.pinchStartAngle); syncEditorsFromLayer(); render(); }
+    }
+    function pointerUp(event) {
+      pointers.delete(event.pointerId); if (pointers.size === 0) { gesture.dragging = false; queueAutosave(); }
+      if (pointers.size === 1) { const layer = getActiveLayer(); if (!isTransformable(layer) || layer.locked || !layer.visible) return; const point = Array.from(pointers.values())[0]; gesture.dragging = true; gesture.startX = point.x; gesture.startY = point.y; gesture.startLayerX = layer.x; gesture.startLayerY = layer.y; }
+    }
+
+    function persistFrames() { localStorage.setItem(storage.frames, JSON.stringify(app.savedFrames)); }
+    function loadFrames() { try { const raw = JSON.parse(localStorage.getItem(storage.frames) || 'null'); if (raw) app.savedFrames = { portrait: raw.portrait || [], square: raw.square || [], landscape: raw.landscape || [] }; } catch {} }
+    function populateSavedFramesSelect() {
+      const list = app.savedFrames[app.sizeKey] || []; savedFramesSelect.innerHTML = '';
+      if (!list.length) { savedFramesSelect.innerHTML = '<option value="">لا يوجد فريم محفوظ</option>'; return; }
+      list.forEach(item => { const option = document.createElement('option'); option.value = item.id; option.textContent = item.name; savedFramesSelect.appendChild(option); });
+    }
+    async function applyFrameById(frameId) {
+      if (!frameId) return; const item = (app.savedFrames[app.sizeKey] || []).find(f => f.id === frameId); if (!item) return;
+      app.frame.image = await dataURLToImage(item.dataUrl); app.frame.frameId = item.id; localStorage.setItem(storage.lastFrame, JSON.stringify({ ...JSON.parse(localStorage.getItem(storage.lastFrame) || '{}'), [app.sizeKey]: item.id })); renderAndMaybeSave('تم تفعيل الفريم ✅');
+    }
+    function applyLastSavedFrameForCurrentSize() {
+      try { const map = JSON.parse(localStorage.getItem(storage.lastFrame) || '{}'); if (map[app.sizeKey]) applyFrameById(map[app.sizeKey]); } catch {}
+    }
+    async function saveFrameToLibrary() {
+      if (!app.tempFrameImage) return alert('ارفع الفريم الأول.');
+      const item = { id:newId('frame'), name: frameNameInput.value.trim() || `Frame ${new Date().toLocaleTimeString('ar-EG')}`, dataUrl: imageToDataURL(app.tempFrameImage) };
+      const list = app.savedFrames[app.sizeKey] || []; list.unshift(item); app.savedFrames[app.sizeKey] = list.slice(0, 20); persistFrames(); populateSavedFramesSelect(); savedFramesSelect.value = item.id; await applyFrameById(item.id); statusText.textContent = 'تم حفظ الفريم ✅';
+    }
+    function deleteSelectedFrame() {
+      const frameId = savedFramesSelect.value; if (!frameId) return;
+      app.savedFrames[app.sizeKey] = (app.savedFrames[app.sizeKey] || []).filter(item => item.id !== frameId); persistFrames(); populateSavedFramesSelect(); if (app.frame.frameId === frameId) { app.frame.image = null; app.frame.frameId = ''; render(); } queueAutosave();
+    }
+
+    function persistLogos() { localStorage.setItem(storage.logos, JSON.stringify(app.savedLogos)); }
+    function loadLogos() { try { app.savedLogos = JSON.parse(localStorage.getItem(storage.logos) || '[]') || []; } catch { app.savedLogos = []; } }
+    function populateSavedLogosSelect() {
+      savedLogosSelect.innerHTML = '';
+      if (!app.savedLogos.length) { savedLogosSelect.innerHTML = '<option value="">لا يوجد لوجوهات محفوظة</option>'; return; }
+      app.savedLogos.forEach(item => { const option = document.createElement('option'); option.value = item.id; option.textContent = item.name; savedLogosSelect.appendChild(option); });
+    }
+    async function saveLogoToLibrary() {
+      if (!app.tempLogoImage) return alert('ارفع لوجو الأول.');
+      const item = { id:newId('liblogo'), name: logoNameInput.value.trim() || `Logo ${new Date().toLocaleTimeString('ar-EG')}`, dataUrl: imageToDataURL(app.tempLogoImage) };
+      app.savedLogos.unshift(item); app.savedLogos = app.savedLogos.slice(0, 30); persistLogos(); populateSavedLogosSelect(); savedLogosSelect.value = item.id; statusText.textContent = 'تم حفظ اللوجو بالمكتبة ✅'; queueAutosave();
+    }
+    async function applySavedLogoAsLayer() {
+      const logoId = savedLogosSelect.value; if (!logoId) return;
+      const item = app.savedLogos.find(l => l.id === logoId); if (!item) return; const img = await dataURLToImage(item.dataUrl); addLogoLayer(img, item.name);
+    }
+    function deleteSavedLogo() {
+      const logoId = savedLogosSelect.value; if (!logoId) return; app.savedLogos = app.savedLogos.filter(item => item.id !== logoId); persistLogos(); populateSavedLogosSelect(); queueAutosave(); render();
+    }
+
+    function applyTemplate(name) {
+      app.textLayers = [];
+      const size = getCanvasSize();
+      if (name === 'breaking') {
+        const t1 = createTextLayer('عاجل'); Object.assign(t1, textPresets.breaking, { y: Math.round(size.height * 0.14), fontSize: 110 });
+        const t2 = createTextLayer('اكتب عنوان الخبر هنا'); Object.assign(t2, textPresets.breaking, { y: Math.round(size.height * 0.78), fontSize: 82 });
+        app.textLayers.push(t1, t2);
+      }
+      if (name === 'result') {
+        const t1 = createTextLayer('3 - 1'); Object.assign(t1, textPresets.result, { y: Math.round(size.height * 0.50), fontSize: 150 });
+        const t2 = createTextLayer('اسم الفريق الأول ضد الفريق الثاني'); Object.assign(t2, textPresets.breaking, { y: Math.round(size.height * 0.82), fontSize: 64 });
+        app.textLayers.push(t1, t2);
+      }
+      if (name === 'lineup') {
+        const t1 = createTextLayer('التشكيل الرسمي'); Object.assign(t1, textPresets.lineup, { y: Math.round(size.height * 0.12), fontSize: 90 });
+        const t2 = createTextLayer('حارس المرمى'); Object.assign(t2, textPresets.lineup, { y: Math.round(size.height * 0.42), fontSize: 58 });
+        const t3 = createTextLayer('خط الدفاع'); Object.assign(t3, textPresets.lineup, { y: Math.round(size.height * 0.54), fontSize: 58 });
+        const t4 = createTextLayer('خط الوسط والهجوم'); Object.assign(t4, textPresets.lineup, { y: Math.round(size.height * 0.66), fontSize: 58 });
+        app.textLayers.push(t1, t2, t3, t4);
+      }
+      if (name === 'transfer') {
+        const t1 = createTextLayer('تم التعاقد رسميًا'); Object.assign(t1, textPresets.transfer, { y: Math.round(size.height * 0.16), fontSize: 98 });
+        const t2 = createTextLayer('اسم اللاعب'); Object.assign(t2, textPresets.breaking, { y: Math.round(size.height * 0.74), fontSize: 84 });
+        const t3 = createTextLayer('مدة العقد / التفاصيل'); Object.assign(t3, textPresets.lineup, { y: Math.round(size.height * 0.84), fontSize: 54 });
+        app.textLayers.push(t1, t2, t3);
+      }
+      setActiveLayer(app.textLayers[0]?.id || app.background.id);
+      renderAndMaybeSave('تم تطبيق القالب ✨');
+    }
+
+    function serializeProject() {
+      return {
+        sizeKey: app.sizeKey,
+        activeLayerId: app.activeLayerId,
+        projectSavedAt: new Date().toLocaleString('ar-EG'),
+        background: { ...cloneData(app.background), image: app.background.image ? imageToDataURL(app.background.image) : '' },
+        textLayers: app.textLayers.map(layer => cloneData(layer)),
+        logoLayers: app.logoLayers.map(layer => ({ ...cloneData(layer), image: layer.image ? imageToDataURL(layer.image) : '' })),
+        frame: { ...cloneData(app.frame), image: app.frame.image ? imageToDataURL(app.frame.image) : '' },
+        savedFrames: app.savedFrames,
+        savedLogos: app.savedLogos
+      };
+    }
+
+    function queueAutosave() {
+      clearTimeout(app.autosaveTimer);
+      app.autosaveTimer = setTimeout(() => saveProject(true), 450);
+    }
+
+    async function saveProject(silent = false) {
+      const project = serializeProject();
+      localStorage.setItem(storage.project, JSON.stringify(project));
+      app.projectSavedAt = project.projectSavedAt; projectText.textContent = `Autosave: آخر حفظ ${app.projectSavedAt}`;
+      if (!silent) statusText.textContent = 'تم حفظ المشروع ✅';
+    }
+
+    async function loadProject() {
+      try {
+        const raw = localStorage.getItem(storage.project); if (!raw) return;
+        const project = JSON.parse(raw);
+        if (project.sizeKey && sizes[project.sizeKey]) app.sizeKey = project.sizeKey;
+        app.savedFrames = project.savedFrames || app.savedFrames; app.savedLogos = project.savedLogos || app.savedLogos;
+        app.background = { ...app.background, ...project.background, image: await dataURLToImage(project.background?.image || '') };
+        app.textLayers = (project.textLayers || []).map(item => ({ ...createTextLayer(''), ...item }));
+        app.logoLayers = [];
+        for (const item of (project.logoLayers || [])) { app.logoLayers.push({ ...createLogoLayer(null), ...item, image: await dataURLToImage(item.image || '') }); }
+        app.frame = { ...app.frame, ...project.frame, image: await dataURLToImage(project.frame?.image || '') };
+        app.activeLayerId = project.activeLayerId || app.background.id;
+        app.projectSavedAt = project.projectSavedAt || null;
+      } catch (error) { console.error(error); }
+      updateCanvasSize();
+      sizeChips.forEach(chip => chip.classList.toggle('active', chip.dataset.size === app.sizeKey));
+      populateSavedFramesSelect(); populateSavedLogosSelect(); syncEditorsFromLayer(); render();
+      if (app.projectSavedAt) projectText.textContent = `Autosave: آخر حفظ ${app.projectSavedAt}`;
+    }
+
+    function resetProject() {
+      app.background.image = null; app.background.fit = 'cover'; app.textLayers = []; app.logoLayers = []; app.frame.image = null; app.frame.frameId = ''; centerDefaultsForSize(); app.activeLayerId = app.background.id;
+      bgInput.value = ''; logoInput.value = ''; frameInput.value = ''; frameNameInput.value = ''; logoNameInput.value = ''; app.projectSavedAt = null; projectText.textContent = 'Autosave: شغال'; syncEditorsFromLayer(); renderAndMaybeSave('تم Reset للمشروع ✨');
+    }
+
+    function renderAndMaybeSave(message = '') { render(); if (message) statusText.textContent = message; syncEditorsFromLayer(); queueAutosave(); }
+
+    function exportImage(type) {
+      clearTimeout(app.previewTimer); render({ includeEditorOverlay:false, includeGuides:false });
+      const quality = highQualityInput.checked ? 0.96 : 0.88; const link = document.createElement('a'); link.download = type === 'jpg' ? 'football-design.jpg' : 'football-design.png'; link.href = type === 'jpg' ? canvas.toDataURL('image/jpeg', quality) : canvas.toDataURL('image/png'); link.click(); render(); statusText.textContent = 'تم التصدير بدون الحدود الصفراء ✅';
+    }
+
+    sizeChips.forEach(chip => chip.addEventListener('click', () => { if (chip.dataset.size === 'reset') { centerDefaultsForSize(); syncEditorsFromLayer(); renderAndMaybeSave('تم Reset للمقاس ✨'); return; } setSize(chip.dataset.size, true); }));
+    bgInput.addEventListener('change', async () => { app.background.image = await readFileAsImage(bgInput.files[0]); setActiveLayer(app.background.id); resetLayer(); statusText.textContent = 'تم تحميل الصورة الأساسية ✅'; renderAndMaybeSave(); });
+    logoInput.addEventListener('change', async () => { app.tempLogoImage = await readFileAsImage(logoInput.files[0]); if (app.tempLogoImage) { addLogoLayer(app.tempLogoImage, logoNameInput.value.trim() || 'لوجو جديد'); statusText.textContent = 'تم تحميل اللوجو كـ Layer ✅'; } });
+    frameInput.addEventListener('change', async () => { app.tempFrameImage = await readFileAsImage(frameInput.files[0]); if (app.tempFrameImage) statusText.textContent = 'الفريم جاهز، احفظه أو استخدمه الآن ✨'; });
+
+    document.getElementById('saveLogoBtn').addEventListener('click', saveLogoToLibrary);
+    document.getElementById('addLogoLayerBtn').addEventListener('click', () => addLogoLayer(app.tempLogoImage, logoNameInput.value.trim() || 'لوجو جديد'));
+    document.getElementById('applySavedLogoBtn').addEventListener('click', applySavedLogoAsLayer);
+    document.getElementById('deleteSavedLogoBtn').addEventListener('click', deleteSavedLogo);
+
+    document.getElementById('saveFrameBtn').addEventListener('click', saveFrameToLibrary);
+    document.getElementById('useFrameTempBtn').addEventListener('click', () => { if (!app.tempFrameImage) return alert('ارفع الفريم الأول.'); app.frame.image = app.tempFrameImage; app.frame.frameId = ''; setActiveLayer(app.frame.id); renderAndMaybeSave('تم تفعيل الفريم ✅'); });
+    document.getElementById('applySavedFrameBtn').addEventListener('click', () => applyFrameById(savedFramesSelect.value));
+    document.getElementById('deleteSavedFrameBtn').addEventListener('click', deleteSelectedFrame);
+    savedFramesSelect.addEventListener('change', () => applyFrameById(savedFramesSelect.value));
+
+    document.getElementById('addTextLayerBtn').addEventListener('click', () => addTextLayer());
+    document.getElementById('duplicateLayerBtn').addEventListener('click', duplicateLayer);
+    document.getElementById('moveUpBtn').addEventListener('click', () => moveActiveLayer('up'));
+    document.getElementById('moveDownBtn').addEventListener('click', () => moveActiveLayer('down'));
+    document.getElementById('deleteLayerBtn').addEventListener('click', () => deleteLayer());
+
+    textValueInput.addEventListener('input', () => { syncTextEditorToLayer(); renderAndMaybeSave(); });
+    [fontSizeInput, fontFamilyInput, textColorInput, strokeColorInput, strokeWidthInput, textAlignInput].forEach(el => { el.addEventListener('input', () => { syncTextEditorToLayer(); renderAndMaybeSave(); }); el.addEventListener('change', () => { syncTextEditorToLayer(); renderAndMaybeSave(); }); });
+    document.querySelectorAll('#textPresets .preset-btn').forEach(btn => btn.addEventListener('click', () => applyTextPreset(btn.dataset.preset)));
+    document.querySelectorAll('#templateButtons .preset-btn').forEach(btn => btn.addEventListener('click', () => applyTemplate(btn.dataset.template)));
+
+    [layerVisibleInput, layerLockedInput, layerXInput, layerYInput, layerScaleInput, layerRotateInput, bgFitInput].forEach(el => { el.addEventListener('input', applyLayerInputs); el.addEventListener('change', applyLayerInputs); });
+    document.getElementById('nudgeUp').addEventListener('click', () => nudge(0,-1));
+    document.getElementById('nudgeDown').addEventListener('click', () => nudge(0,1));
+    document.getElementById('nudgeLeft').addEventListener('click', () => nudge(-1,0));
+    document.getElementById('nudgeRight').addEventListener('click', () => nudge(1,0));
+    document.getElementById('resetLayerBtn').addEventListener('click', resetLayer);
+    document.getElementById('centerLayerBtn').addEventListener('click', centerLayer);
+
+    showGuidesInput.addEventListener('change', () => render());
+    document.getElementById('renderBtn').addEventListener('click', render);
+    document.getElementById('previewCleanBtn').addEventListener('click', previewCleanExport);
+    document.getElementById('downloadPngBtn').addEventListener('click', () => exportImage('png'));
+    document.getElementById('downloadJpgBtn').addEventListener('click', () => exportImage('jpg'));
+    document.getElementById('toggleGuidesBtn').addEventListener('click', () => { showGuidesInput.checked = !showGuidesInput.checked; render(); statusText.textContent = showGuidesInput.checked ? 'تم إظهار الـ guides ✨' : 'تم إخفاء الـ guides ✨'; });
+    document.getElementById('saveProjectBtn').addEventListener('click', () => saveProject(false));
+    document.getElementById('resetProjectBtn').addEventListener('click', resetProject);
+    document.getElementById('stickyRenderBtn').addEventListener('click', render);
+    document.getElementById('stickyPngBtn').addEventListener('click', () => exportImage('png'));
+    document.getElementById('stickySaveBtn').addEventListener('click', () => saveProject(false));
+
+    canvas.addEventListener('pointerdown', pointerDown);
+    canvas.addEventListener('pointermove', pointerMove);
+    canvas.addEventListener('pointerup', pointerUp);
+    canvas.addEventListener('pointercancel', pointerUp);
+    canvas.addEventListener('pointerleave', pointerUp);
+
+    function init() {
+      populatePalette('textPalette', palettes, 'text'); populatePalette('strokePalette', palettes, 'stroke');
+      loadFrames(); loadLogos(); populateSavedFramesSelect(); populateSavedLogosSelect();
+      updateCanvasSize(); centerDefaultsForSize(); addTextLayer('اكتب عنوانك هنا');
+      setActiveLayer(app.background.id);
+      loadProject();
+      render();
+    }
+    init();
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('./service-worker.js').catch(function(err) {
+          console.log('SW registration failed:', err);
+        });
+      });
+    }
+
+  </script>
+</body>
+</html>
